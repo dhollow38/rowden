@@ -1,0 +1,83 @@
+name: Deploy AWS Lambda with Terraform
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true  # Stops the job's execution on the first failure
+
+    env:
+      AWS_REGION: 'eu-west-2'  # Set your AWS region here
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'  # Automatically selects the latest version of Python 3
+
+      #set -e command used throughout the steps to ensure the shell is exited if there are any errors
+      - name: Install Python dependencies
+        run: |
+          set -e 
+          python -m pip install --upgrade pip
+          pip install flake8 pylint
+
+      #First linting pass using Flake8
+      - name: Lint Python code with Flake8
+        run: |
+          set -e
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      
+      #Second linting pass using Pylint (Both are used to catch as many errors as possible
+      - name: Lint Python code with Pylint
+        run: |
+          set -e
+          pylint **/*.py
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 'latest'  # Automatically selects the latest version of Terraform
+
+      - name: Terraform Init
+        run: |
+          set -e
+          terraform init
+
+      - name: Terraform Format
+        run: |
+          set -e
+          terraform fmt -check
+
+      - name: Terraform Validate
+        run: |
+          set -e
+          terraform validate
+
+      #- name: Configure AWS credentials
+      #  uses: aws-actions/configure-aws-credentials@v1
+      #  with:
+      #    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #    aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Plan
+        run: |
+          set -e
+          terraform plan
+
+      - name: Terraform Apply
+        if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'))
+        run: |
+          set -e
+          terraform apply -auto-approve
