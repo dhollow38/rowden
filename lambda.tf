@@ -67,7 +67,7 @@ resource "aws_iam_policy" "cloudwatch_logs_access_policy" {
 
 resource "aws_iam_role_policy_attachment" "ec2_shut_down_lambda_execution_role_cloudwatch_access" {
   role       = "${aws_iam_role.ec2_shut_down_lambda_execution_role.name}"
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+  policy_arn = "${aws_iam_policy.cloudwatch_logs_access_policy.arn}"
 }
 
 #required ec2 permissions
