@@ -1,0 +1,56 @@
+name: Terraform Checks for Lambda Deployment
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  terraform-validation:
+    name: Terraform Validation and Planning
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: 'u-west-2'  # Set your AWS region here
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 'latest'  # Automatically selects the latest version of Terraform
+
+      - name: Initialize Terraform
+        run: |
+          set -e
+          terraform init
+
+      - name: Format Terraform code
+        run: |
+          set -e
+          terraform fmt -check
+
+      - name: Validate Terraform configuration
+        run: |
+          set -e
+          terraform validate
+
+      #- name: Configure AWS credentials
+      #  uses: aws-actions/configure-aws-credentials@v1
+      #  with:
+      #    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #    aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Plan
+        run: |
+          set -e
+          terraform plan
+
+      # The Terraform Apply step is only triggered on certain conditions, such as a push to specific branches.
+      #- name: Terraform Apply
+      #  if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'))
+      #  run: |
+      #    set -e
+      #    terraform apply -auto-approve
