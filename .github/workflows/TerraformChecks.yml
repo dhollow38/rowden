@@ -1,0 +1,48 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Terrform Checks
+
+# Controls when the workflow will run
+on:
+  push:
+  pull_request:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  terraform-validation:
+    name: Terraform Validation and Planning
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: 'eu-west-2'  # Your AWS region
+    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 'latest'  # Use the latest version of Terraform
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Format Terraform code
+        run: terraform fmt -check
+
+      - name: Validate Terraform configuration
+        run: terraform validate
+
+      #- name: Configure AWS credentials
+      #  uses: aws-actions/configure-aws-credentials@v1
+      #  with:
+      #    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #    aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Plan
+        run: terraform plan
