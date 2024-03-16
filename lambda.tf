@@ -1,6 +1,7 @@
 #the lambda function for the ec2 shut down process
 resource "aws_lambda_function" "ec2_shut_down_lambda_function" {
   filename          = "lambda_source_code/lambda_ec2_shut_down.zip"
+  source_code_hash  = filebase64sha256("lambda_source_code/lambda_function.zip")
   function_name     = "ec2_shut_down"
   role              = "${aws_iam_role.ec2_shut_down_lambda_execution_role.arn}"
   handler           = "lambda_function.lambda_handler"
