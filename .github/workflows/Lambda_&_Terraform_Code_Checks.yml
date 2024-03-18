@@ -58,9 +58,9 @@ jobs:
       #    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       #    aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform Plan
-        run: terraform plan
+      #- name: Terraform Plan
+      #  run: terraform plan
 
-      - name: Terraform Apply
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
-        run: terraform apply -auto-approve
+      #- name: Terraform Apply
+      #  if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
+      #  run: terraform apply -auto-approve
